@@ -2,6 +2,8 @@ defmodule NaturalLanguageAssertions do
   @list_verbs_plural [:includes, :contains, :has]
   @list_verbs_singular [:include, :contain, :have]
 
+  @verbs @list_verbs_plural ++ @list_verbs_singular
+
   def verb_label(verb, value, :ok), do: "#{verb} #{inspect(value)}"
   def verb_label(verb, value, :fail), do: "doesn't #{verb} #{inspect(value)}"
 
@@ -50,7 +52,8 @@ defmodule NaturalLanguageAssertions do
   end
 
   defp assert_in(bindings, key, verb, value) do
-    collection = bindings[key]
+    value = if is_atom(value), do: Keyword.get(bindings, value, value), else: value
+    collection = bindings[key] || []
     result? = value in collection
     status = if result?, do: :ok, else: :fail
     label = get_label(collection, key, verb, value, status)
@@ -65,16 +68,19 @@ defmodule NaturalLanguageAssertions do
     Macro.prewalk(block, &prewalk(&1, bindings))
   end
 
-  defp prewalk({binding_key, _, [{:should, _, [{:contain, _, [value]}]}]}, bindings) do
-    assert_in(bindings, binding_key, :contain, value)
+  defp prewalk({binding_key, _, [{:should, _, [{verb, _, [value]}]}]}, bindings) when verb in @verbs do
+    assert_in(bindings, binding_key, verb, value)
   end
 
-  defp prewalk({binding_key, _, [{:should, _, [{:have, _, [value]}]}]}, bindings) do
-    assert_in(bindings, binding_key, :have, value)
+  defp prewalk({binding_key, _, [{verb, _, [{value, _, _}]}]}, bindings) when verb in @verbs do
+    assert_in(bindings, binding_key, verb, value)
+  end
+  defp prewalk({binding_key, _, [{verb, _, [value]}]}, bindings) when verb in @verbs do
+    assert_in(bindings, binding_key, verb, value)
   end
 
-  defp prewalk({binding_key, _, [{:should, _, [{:include, _, [value]}]}]}, bindings) do
-    assert_in(bindings, binding_key, :include, value)
+  defp prewalk(ast, _bindings), do: ast
+end
   end
 
   defp prewalk({binding_key, _, [{:contains, _, [value]}]}, bindings) do
