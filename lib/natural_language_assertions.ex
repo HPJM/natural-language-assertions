@@ -2,21 +2,32 @@ defmodule NaturalLanguageAssertions do
   @list_verbs_plural [:includes, :contains, :has]
   @list_verbs_singular [:include, :contain, :have]
 
+  def verb_label(verb, value, :ok), do: "#{verb} #{inspect(value)}"
+  def verb_label(verb, value, :fail), do: "doesn't #{verb} #{inspect(value)}"
+
+  defp list_label_prefix(list, key) do
+    "#{key} #{inspect(list)}" <> " "
+  end
+  defp get_label(list, key, verb, value, status) do
+    list_label_prefix(list, key) <> get_list_label(verb, value, status)
+  end
+
+
   for {singular, plural} <- Enum.zip(@list_verbs_singular, @list_verbs_plural) do
-    defp get_list_label(list, key, unquote(singular), value, :ok) do
-      "#{key} #{inspect(list)}" <> " " <> verb_label(unquote(plural), value, :ok)
+    defp get_list_label(unquote(singular), value, :ok) do
+      verb_label(unquote(plural), value, :ok)
     end
 
-    defp get_list_label(list, key, unquote(plural), value, :ok) do
-      "#{key} #{inspect(list)}" <> " " <> verb_label(unquote(plural), value, :ok)
+    defp get_list_label(unquote(plural), value, :ok) do
+      verb_label(unquote(plural), value, :ok)
     end
 
-    defp get_list_label(list, key, unquote(plural), value, :fail) do
-      "#{key} #{inspect(list)}" <> " " <> verb_label(unquote(singular), value, :fail)
+    defp get_list_label(unquote(plural), value, :fail) do
+      verb_label(unquote(singular), value, :fail)
     end
 
-    defp get_list_label(list, key, unquote(singular), value, :fail) do
-      "#{key} #{inspect(list)}" <> " " <> verb_label(unquote(singular), value, :fail)
+    defp get_list_label(unquote(singular), value, :fail) do
+      verb_label(unquote(singular), value, :fail)
     end
   end
 
@@ -36,13 +47,6 @@ defmodule NaturalLanguageAssertions do
         unquote(results)
       end
     end
-  end
-
-  def verb_label(verb, value, :ok), do: "#{verb} #{inspect(value)}"
-  def verb_label(verb, value, :fail), do: "doesn't #{verb} #{inspect(value)}"
-
-  defp get_label(list, key, verb, value, status) do
-    get_list_label(list, key, verb, value, status)
   end
 
   defp assert_in(bindings, key, verb, value) do
