@@ -1,6 +1,40 @@
 # NaturalLanguageAssertions
 
-**TODO: Add description**
+This project is meant to add natural language assertions so that testing can be done in plain English.
+
+## Examples
+
+```elixir
+defmodule Example do
+  use NaturalLanguageAssertions
+
+  assert_natural list: [1, 2, 3] do
+    list should contain 2
+    list contains 2
+    list should contain 100
+    list contains 100
+  end
+
+  assert_natural collection: ["dog", "cat"] do
+    collection includes 3
+    collection should include 3
+    collection includes "dog"
+    collection should include "cat"
+  end
+
+  assert_natural collection: [:hello, :world] do
+    collection has :hello
+    collection should have :hello
+    collection has :yellow
+    collection should have :yellow
+  end
+
+  def results do
+    get_results()
+  end
+
+end
+```
 
 ## Installation
 
@@ -14,8 +48,3 @@ def deps do
   ]
 end
 ```
-
-Documentation can be generated with [ExDoc](https://github.com/elixir-lang/ex_doc)
-and published on [HexDocs](https://hexdocs.pm). Once published, the docs can
-be found at [https://hexdocs.pm/natural_language_assertions](https://hexdocs.pm/natural_language_assertions).
-
