@@ -68,6 +68,10 @@ defmodule NaturalLanguageAssertions do
     Macro.prewalk(block, &prewalk(&1, bindings))
   end
 
+  defp prewalk({binding_key, _, [{:should, _, [{verb, _, [{value, _, _}]}]}]}, bindings) when verb in @verbs do
+    assert_in(bindings, binding_key, verb, value)
+  end
+
   defp prewalk({binding_key, _, [{:should, _, [{verb, _, [value]}]}]}, bindings) when verb in @verbs do
     assert_in(bindings, binding_key, verb, value)
   end
@@ -75,24 +79,9 @@ defmodule NaturalLanguageAssertions do
   defp prewalk({binding_key, _, [{verb, _, [{value, _, _}]}]}, bindings) when verb in @verbs do
     assert_in(bindings, binding_key, verb, value)
   end
+
   defp prewalk({binding_key, _, [{verb, _, [value]}]}, bindings) when verb in @verbs do
     assert_in(bindings, binding_key, verb, value)
-  end
-
-  defp prewalk(ast, _bindings), do: ast
-end
-  end
-
-  defp prewalk({binding_key, _, [{:contains, _, [value]}]}, bindings) do
-    assert_in(bindings, binding_key, :contains, value)
-  end
-
-  defp prewalk({binding_key, _, [{:includes, _, [value]}]}, bindings) do
-    assert_in(bindings, binding_key, :includes, value)
-  end
-
-  defp prewalk({binding_key, _, [{:has, _, [value]}]}, bindings) do
-    assert_in(bindings, binding_key, :has, value)
   end
 
   defp prewalk(ast, _bindings), do: ast
